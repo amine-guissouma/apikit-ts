@@ -27,7 +27,7 @@ export function apikitExceptionHandler(options: ApikitExceptionHandlerOptions): 
             options.onBusinessError?.(options.error);
             return;
 
-        case ErrorCategory.GLOBAL:
+        case ErrorCategory.SERVER_UNHANDLED:
             // Déjà traité par request()
             return;
     }

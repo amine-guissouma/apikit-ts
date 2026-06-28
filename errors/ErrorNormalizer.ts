@@ -1,7 +1,7 @@
 import {ApikitException} from "../api/ApikitException";
 import axios, {AxiosError} from "axios";
 import {ErrorCategory} from "./ErrorCategory";
-import {getMappedError} from "../axios/getAxiosError";
+import {ErrorDefinition, getMappedError} from "../axios/getAxiosError";
 import {AxiosErrorMap} from "../axios/AxiosErrorMap";
 import {errorClassify} from "./ErrorClassify";
 
@@ -23,31 +23,32 @@ export const errorNormalizer = (error: unknown): ApikitException => {
         return new ApikitException(
             "UNKNOWN_ERROR",
             "Une erreur inattendue est survenue.",
-            ErrorCategory.GLOBAL
+            ErrorCategory.SERVER_UNHANDLED
         );
     }
 
     const axiosError = error as AxiosError;
 
     //------------------------------------------------
-    // Erreur réseau
+    // Erreur réseau : axios pas de reponse
     //------------------------------------------------
 
     if (!axiosError.response) {
 
-        const mapped = getMappedError(
+        const  defaultError : ErrorDefinition= {
+            code: "UNKNOWN_NETWORK_ERROR",
+            message: axiosError.message,
+        };
+        const mapped : ErrorDefinition = getMappedError(
             AxiosErrorMap,
             axiosError.code,
-            {
-                code: "UNKNOWN_NETWORK_ERROR",
-                message: axiosError.message,
-            }
+            defaultError
         );
 
         return new ApikitException(
             mapped.code,
             mapped.message,
-            ErrorCategory.GLOBAL
+            ErrorCategory.TECHNICAL
         );
     }
 

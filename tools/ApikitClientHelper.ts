@@ -6,6 +6,7 @@ import {ApikitException} from "../api/ApikitException";
 import {ErrorCategory} from "../errors/ErrorCategory";
 import {handleGlobalError} from "../errors/ErrorEngine";
 import {errorNormalizer} from "../errors/ErrorNormalizer";
+import { z } from 'zod';
 
 
 export enum Method {
@@ -20,6 +21,7 @@ export enum Method {
     LINK = "link" ,
     UNLINK = "unlink" ,
 }
+
 interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
     payload?: unknown;
 }
@@ -44,7 +46,7 @@ export async function apikitRequest<T>(
         // transforme les exception en ApikitException
         const exception:ApikitException = errorNormalizer(error);
 
-        if (exception.errorType === ErrorCategory.GLOBAL) {
+        if (exception.errorType === ErrorCategory.SERVER_UNHANDLED) {
             handleGlobalError(exception);
         }
 

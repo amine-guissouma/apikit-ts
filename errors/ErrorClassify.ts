@@ -7,5 +7,5 @@ export const errorClassify = (
     if (code && code in ErrorCodeMap) {
         return ErrorCategory.BUSINESS;
     }
-    return ErrorCategory.GLOBAL;
+    return ErrorCategory.SERVER_UNHANDLED;
 };
