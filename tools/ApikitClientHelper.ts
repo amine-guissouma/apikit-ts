@@ -22,6 +22,7 @@ export enum Method {
     UNLINK = "unlink" ,
 }
 
+
 interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
     payload?: unknown;
 }
@@ -29,18 +30,22 @@ interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
 export async function apikitRequest<T>(
     method: Method,
     url: string,
-    { payload, ...config }: RequestOptions = {}
+    { payload, ...config }: RequestOptions = {},
+    schema?: z.ZodSchema<T>,
 ): Promise<T> {
-
     try {
 
         const response : AxiosResponse<ApikitResponse<T>> = await api.request<ApikitResponse<T>>({
             method,
             url,
-            data: {payloads:payload},
+            data: {payload:payload},
             ...config
         });
-        return unwrap(response.data);
+        const data: T = unwrap(response.data);
+        if (schema)  {
+            return schema.parse(data);
+        }
+        return data
 
     } catch (error) {
         // transforme les exception en ApikitException
@@ -49,7 +54,6 @@ export async function apikitRequest<T>(
         if (exception.errorType === ErrorCategory.SERVER_UNHANDLED) {
             handleGlobalError(exception);
         }
-
         throw exception;
     }
 }
