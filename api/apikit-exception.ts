@@ -1,4 +1,4 @@
-import {ErrorCategory} from "../errors/ErrorCategory";
+import {ErrorCategory} from "../errors/enum/ErrorCategory";
 
 export class ApikitException extends Error {
     code: string;

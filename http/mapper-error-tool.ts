@@ -15,6 +15,5 @@ export const getMappedError = (
     if (!key) {
         return defaultError;
     }
-
     return map[key] ?? defaultError;
 };

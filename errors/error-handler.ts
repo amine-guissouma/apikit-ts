@@ -1,6 +1,6 @@
-import {ApikitException} from "../api/ApikitException";
-import {ERROR_LEVEL} from "../apikitConfig";
-import {ErrorLevelVisibility} from "./ErrorLevelVisibility";
+import {ApikitException} from "../api/apikit-exception";
+import {ERROR_LEVEL} from "../apikit-config";
+import {ErrorLevelVisibility} from "./enum/ErrorLevelVisibility";
 import {PopupService} from "../../components/info/popup/PopupService";
 import {ToastService} from "../../components/info/toast/ToastService";
 

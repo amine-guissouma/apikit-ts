@@ -1,7 +1,7 @@
-import { ErrorCategory } from "./ErrorCategory";
+import { ErrorCategory } from "./enum/ErrorCategory";
 
-export const ErrorCodeMap: Record<string, ErrorCategory> = {
-    // todo plus tard fournir à partir du fichier apikitConfig.ts
+export const BusinessErrorCodes: Record<string, ErrorCategory> = {
+    // todo plus tard fournir à partir du fichier apikit-config.ts
     // SFF
     SFF_NOT_FOUND: ErrorCategory.BUSINESS,
     SFF_ALREADY_EXISTS: ErrorCategory.BUSINESS,

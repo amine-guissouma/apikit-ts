@@ -1,9 +1,9 @@
-import {ApikitException} from "../api/ApikitException";
+import {ApikitException} from "../api/apikit-exception";
 import axios, {AxiosError} from "axios";
-import {ErrorCategory} from "./ErrorCategory";
-import {ErrorDefinition, getMappedError} from "../axios/getAxiosError";
-import {AxiosErrorMap} from "../axios/AxiosErrorMap";
-import {errorClassify} from "./ErrorClassify";
+import {ErrorCategory} from "./enum/ErrorCategory";
+import {ErrorDefinition, getMappedError} from "../http/mapper-error-tool";
+import {AxiosErrorMapper} from "../http/axios/axios-error-mapper";
+import {errorClassifier} from "./error-classifier";
 
 export const errorNormalizer = (error: unknown): ApikitException => {
 
@@ -40,7 +40,7 @@ export const errorNormalizer = (error: unknown): ApikitException => {
             message: axiosError.message,
         };
         const mapped : ErrorDefinition = getMappedError(
-            AxiosErrorMap,
+            AxiosErrorMapper,
             axiosError.code,
             defaultError
         );
@@ -59,7 +59,7 @@ export const errorNormalizer = (error: unknown): ApikitException => {
     const data = error.response?.data;
     const code = data?.error?.code ?? "UNKNOWN_ERROR";
     const message = data?.error?.message ?? "API Error";
-    const category = errorClassify(code);
+    const category = errorClassifier(code);
 
     return  new ApikitException(
         code,

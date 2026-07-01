@@ -1,9 +1,9 @@
-import {ApikitErrorResponse, ApikitResponse} from "./types";
-import {ApikitException} from "./ApikitException";
-import {ErrorCategory} from "../errors/ErrorCategory";
-import {errorClassify} from "../errors/ErrorClassify";
+import {ApikitErrorResponse, ApikitResponse} from "./apikit-types";
+import {ApikitException} from "./apikit-exception";
+import {ErrorCategory} from "../errors/enum/ErrorCategory";
+import {errorClassifier} from "../errors/error-classifier";
 
-export const unwrap = <T>(
+export const apikitUnwrapper = <T>(
     response: ApikitResponse<T>
 ): T => {
     //  --------------------------------------------
@@ -24,7 +24,7 @@ export const unwrap = <T>(
         throw new ApikitException(
             code,
             error.message ,
-            errorClassify(code),
+            errorClassifier(code),
             error.details
         );
     }

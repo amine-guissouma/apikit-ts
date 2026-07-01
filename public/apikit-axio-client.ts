@@ -1,11 +1,11 @@
 import {AxiosRequestConfig, AxiosResponse} from "axios";
-import {ApikitResponse} from "../api/types";
-import {api} from "../axios/client";
-import {unwrap} from "../api/unwrap";
-import {ApikitException} from "../api/ApikitException";
-import {ErrorCategory} from "../errors/ErrorCategory";
-import {handleGlobalError} from "../errors/ErrorEngine";
-import {errorNormalizer} from "../errors/ErrorNormalizer";
+import {ApikitResponse} from "../api/apikit-types";
+import {api} from "../http/axios/axio-client";
+import {apikitUnwrapper} from "../api/apikit-unwrapper";
+import {ApikitException} from "../api/apikit-exception";
+import {ErrorCategory} from "../errors/enum/ErrorCategory";
+import {handleGlobalError} from "../errors/error-handler";
+import {errorNormalizer} from "../errors/error-normalizer";
 import { z } from 'zod';
 
 
@@ -23,7 +23,7 @@ export enum Method {
 }
 
 
-interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
+export interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
     payload?: unknown;
 }
 
@@ -41,7 +41,7 @@ export async function apikitRequest<T>(
             data: {payload:payload},
             ...config
         });
-        const data: T = unwrap(response.data);
+        const data: T = apikitUnwrapper(response.data);
         if (schema)  {
             return schema.parse(data);
         }

@@ -1,4 +1,4 @@
-export const AxiosErrorMap = {
+export const AxiosErrorMapper = {
     // =========================
     // NETWORK
     // =========================
