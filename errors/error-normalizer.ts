@@ -4,6 +4,7 @@ import {ErrorCategory} from "./enum/ErrorCategory";
 import {ErrorDefinition, getMappedError} from "../http/mapper-error-tool";
 import {AxiosErrorMapper} from "../http/axios/axios-error-mapper";
 import {errorClassifier} from "./error-classifier";
+import {ZodError} from "zod";
 
 export const errorNormalizer = (error: unknown): ApikitException => {
 
@@ -52,6 +53,14 @@ export const errorNormalizer = (error: unknown): ApikitException => {
         );
     }
 
+    if (error instanceof ZodError) {
+        return new ApikitException(
+            "CONTRACT_INVALID",
+            "API contract violation",
+            ErrorCategory.CONTRACT,
+            error.issues
+        );
+    }
     //------------------------------------------------
     // Réponse du serveur
     //------------------------------------------------

@@ -5,6 +5,8 @@ export enum ErrorCategory {
 
     TECHNICAL = "TECHNICAL",    // erreurs techniques (réseau / axios / sdk / infra)
 
+    CONTRACT= "CONTRACT",       // erreurs cntract non respecter
+
     UNEXPECTED = "UNEXPECTED",
 
 }
