@@ -9,45 +9,33 @@ import {errorNormalizer} from "../errors/error-normalizer";
 import { z } from 'zod';
 
 
-export enum Method {
-    GET ="get",
-    DELETE = "delete",
-    HEAD = "head",
-    OPTIONS = "options" ,
-    POST = "post" ,
-    PUT = "put" ,
-    PATCH = "patch" ,
-    PURGE = "purge" ,
-    LINK = "link" ,
-    UNLINK = "unlink" ,
-}
-
-
 export interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
     payload?: unknown;
 }
 
-export async function apikitRequest<T>(
-    method: Method,
+export async function apikitRequest<TResponse>(
+    method: string,
     url: string,
     { payload, ...config }: RequestOptions = {},
-    schema?: z.ZodSchema<T>,
-): Promise<T> {
+    schema?: z.ZodSchema<TResponse>,
+): Promise<TResponse> {
     try {
 
-        const response : AxiosResponse<ApikitResponse<T>> = await api.request<ApikitResponse<T>>({
-            method,
-            url,
-            data: {payload:payload},
-            ...config
-        });
-        const data: T = apikitUnwrapper(response.data);
-        if (schema)  {
+        const response: AxiosResponse<ApikitResponse<TResponse>> = await api.request<ApikitResponse<TResponse>>({
+                method,
+                url,
+                data: {payload:  payload},
+                ...config
+            });
+
+        const data: TResponse = apikitUnwrapper(response.data);
+
+        if (schema) {
             return schema.parse(data);
         }
-        return data
+        return data;
 
-    } catch (error) {
+    } catch (error : unknown) {
         // transforme les exception en ApikitException
         const exception:ApikitException = errorNormalizer(error);
 

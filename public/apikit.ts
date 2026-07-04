@@ -1,62 +1,105 @@
 // apikit.ts
 
 import { z } from "zod";
-import {apikitRequest, RequestOptions,Method} from "./apikit-axio-client";
+import {apikitRequest, RequestOptions} from "./apikit-axio-client";
 
 export class Apikit {
 
-    request<TResponse>(
-        method: Method,
+    request<T>(
+        method: string,
         url: string,
         options: RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
         return apikitRequest(method, url, options, schema);
     }
 
-    get<TResponse>(
+    get<T>(
         url: string,
         config?:RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
-        return this.request(Method.GET, url, {...(config as any), payload: undefined as never,}, schema);
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("GET", url, {...(config as any), payload: undefined as never,}, schema);
     }
 
-    post<TResponse>(
+    delete<T>(
+        url: string,
+        config?:RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("DELETE", url, {...(config as any), payload: undefined as never,}, schema);
+    }
+
+    head<T>(
+        url: string,
+        config?: RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("HEAD", url, {...(config as any), payload: undefined as never,}, schema);
+    }
+
+    options<T>(
+        url: string,
+        config?: RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("OPTIONS", url, {...(config as any), payload: undefined as never,}, schema);
+    }
+
+    post<T>(
         url: string,
         payload: unknown,
         config?: RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
         console.log(payload);
-        return this.request(Method.POST, url, {...config, payload,}, schema);
+        return this.request("POST", url, {...config, payload,}, schema);
     }
 
-    put<TResponse>(
+    put<T>(
         url: string,
         payload: unknown,
         config?:RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
-        return this.request(Method.PUT, url, {...config, payload,}, schema);
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("PUT", url, {...config, payload,}, schema);
     }
 
-    patch<TResponse>(
+    patch<T>(
         url: string,
         payload: unknown,
         config?:RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
-        return this.request(Method.PATCH, url, {...config, payload,}, schema);
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("PATCH", url, {...config, payload,}, schema);
     }
 
-    delete<TResponse>(
+    purge<T>(
         url: string,
-        config?:RequestOptions,
-        schema?: z.ZodSchema<TResponse>,
-    ): Promise<TResponse> {
-        return this.request(Method.DELETE, url, {...(config as any), payload: undefined as never,}, schema);
+        payload?: unknown,
+        config?: RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("PURGE", url, {...config, payload,}, schema,);
+    }
+
+    link<T>(
+        url: string,
+        payload?: unknown,
+        config?: RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("LINK", url, {...config, payload,}, schema,);
+    }
+
+    unlink<T>(
+        url: string,
+        payload?: unknown,
+        config?: RequestOptions,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        return this.request("UNLINK", url, {...config, payload,}, schema,);
     }
 }
 
-export const apikit = new Apikit();
+export const apikit = new Apikit(); 
