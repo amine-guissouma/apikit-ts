@@ -1,11 +1,15 @@
 import { ErrorCategory } from "./enum/ErrorCategory";
-import { BusinessErrorCodes } from "./business-error-codes";
+import { BusinessErrorRegistry} from "./business-error-codes";
 
-export const errorClassifier = (
-    code?: string
-): ErrorCategory => {
-    if (code && code in BusinessErrorCodes) {
-        return ErrorCategory.BUSINESS;
+
+export const errorClassifier = (code?: string): ErrorCategory => {
+
+    if (!code) {
+        return ErrorCategory.SERVER_UNHANDLED;
+    }
+    const category = BusinessErrorRegistry.getCategory(code);
+    if (category) {
+        return category;
     }
     return ErrorCategory.SERVER_UNHANDLED;
 };

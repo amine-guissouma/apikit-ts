@@ -1,21 +1,24 @@
 import { ErrorCategory } from "./enum/ErrorCategory";
 
-export const BusinessErrorCodes: Record<string, ErrorCategory> = {
-    // todo plus tard fournir à partir du fichier apikit-config.ts
-    // SFF
-    SFF_NOT_FOUND: ErrorCategory.BUSINESS,
-    SFF_ALREADY_EXISTS: ErrorCategory.BUSINESS,
+class BusinessErrorManager {
+    private codes: Record<string, ErrorCategory> = {};
 
-    // Validation
-    VALIDATION_ERROR: ErrorCategory.BUSINESS,
+    set(codes: Record<string, ErrorCategory>): void {
+        this.codes = { ...this.codes, ...codes };
+    }
 
-    // Utilisateur
-    USER_NOT_FOUND: ErrorCategory.BUSINESS,
+    get(): Record<string, ErrorCategory> {
+        return this.codes;
+    }
 
-    // Fichier
-    FILE_NOT_FOUND: ErrorCategory.BUSINESS,
+    has(code: string): boolean {
+        return code in this.codes;
+    }
 
-    // Règle métier
-    INVALID_WORKFLOW_STATE: ErrorCategory.BUSINESS,
-    // todo for test
-};
+    getCategory(code: string): ErrorCategory | undefined {
+        return this.codes[code];
+    }
+}
+
+export const BusinessErrorRegistry = new BusinessErrorManager();
+
