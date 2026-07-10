@@ -1,43 +1,63 @@
-import {ApikitErrorResponse, ApikitResponse} from "./apikit-types";
 import {ApikitException} from "./apikit-exception";
 import {ErrorCategory} from "../errors/enum/ErrorCategory";
 import {errorClassifier} from "../errors/error-classifier";
+import {ApikitBaseResponse, apikitBaseResponseSchema} from "./apikit-schema";
+import {z} from "zod";
+
 
 export const apikitUnwrapper = <T>(
-    response: ApikitResponse<T>
+    response: unknown
 ): T => {
-    //  --------------------------------------------
-    // cas de d'erreur
-    //  --------------------------------------------
 
-    if (!response.success) {
-        if (response.error === undefined||response.error ===null) {
-            throw new ApikitException(
-                "UNKNOWN_ERROR",
-                "Malformed API error response 'error' not found ",
-                ErrorCategory.SERVER_UNHANDLED,
-            );
-        }
 
-        const error:ApikitErrorResponse = response.error;
-        const code = error.code;
+    // --------------------------------------------
+    // Validation contrat Apikit
+    // --------------------------------------------
+    const result: z.ZodSafeParseResult<ApikitBaseResponse> = apikitBaseResponseSchema.safeParse(response);
+
+
+    if (!result.success) {
         throw new ApikitException(
-            code,
-            error.message ,
-            errorClassifier(code),
-            error.details
+            "APIKIT_RESPONSE_INVALID",
+            "Invalid Apikit response format",
+            ErrorCategory.CONTRACT,
+            result.error.issues
         );
     }
-    //  --------------------------------------------
-    // cas de success
-    //  --------------------------------------------
 
-    if (!("data" in response)) {
+    const apiResponse:ApikitBaseResponse = result.data;
+
+
+    // --------------------------------------------
+    // Cas erreur API
+    // --------------------------------------------
+
+    if (!apiResponse.success) {
+        if (!apiResponse.error) {
+            throw new ApikitException(
+                "APKIT_ERROR_MALFORMED",
+                "Malformed API error response",
+                ErrorCategory.CONTRACT
+            );
+        }
         throw new ApikitException(
-            'MALFORMED_API',
-            "Malformed API response 'data' not found ",
-            ErrorCategory.SERVER_UNHANDLED)
+            apiResponse.error.code,
+            apiResponse.error.message,
+            errorClassifier(apiResponse.error.code),
+            apiResponse.error.details
+        );
     }
 
-    return response.data;
+    // --------------------------------------------
+    // Cas succès
+    // --------------------------------------------
+    if (!("data" in apiResponse)) {
+        throw new ApikitException(
+            "APIKIT_DATA_MISSING",
+            "Successful API response has no data",
+            ErrorCategory.CONTRACT
+        );
+    }
+
+    return apiResponse.data as T;
 };
