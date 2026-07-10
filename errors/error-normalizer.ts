@@ -20,6 +20,21 @@ export const errorNormalizer = (error: unknown): ApikitException => {
     // Pas une erreur Axios
     //------------------------------------------------
 
+    //------------------------------------------------
+    // erreur Zod
+    //------------------------------------------------
+    if (error instanceof ZodError) {
+        return new ApikitException(
+            "DATA_SCHEMA_INVALID",
+            "API contract violation",
+            ErrorCategory.CONTRACT,
+            error.issues
+        );
+    }
+
+    //------------------------------------------------
+    // erreur indefinie
+    //------------------------------------------------
     if (!axios.isAxiosError(error)) {
         return new ApikitException(
             "UNKNOWN_ERROR",
@@ -28,12 +43,13 @@ export const errorNormalizer = (error: unknown): ApikitException => {
         );
     }
 
+    //------------------------------------------------
+    // axios Erreur
+    //------------------------------------------------
     const axiosError = error as AxiosError;
-
     //------------------------------------------------
     // Erreur réseau : axios pas de reponse
     //------------------------------------------------
-
     if (!axiosError.response) {
 
         const  defaultError : ErrorDefinition= {
@@ -53,20 +69,12 @@ export const errorNormalizer = (error: unknown): ApikitException => {
         );
     }
 
-    if (error instanceof ZodError) {
-        return new ApikitException(
-            "CONTRACT_INVALID",
-            "API contract violation",
-            ErrorCategory.CONTRACT,
-            error.issues
-        );
-    }
-    //------------------------------------------------
-    // Réponse du serveur
-    //------------------------------------------------
 
+    //------------------------------------------------
+    // Erreur serveur :  axios response
+    //------------------------------------------------
     const data = error.response?.data;
-    const code = data?.error?.code ?? "UNKNOWN_ERROR";
+    const code = data?.error?.code ?? "UNKNOWN_ERROR_RESPONSE";
     const message = data?.error?.message ?? "API Error";
     const category = errorClassifier(code);
 
