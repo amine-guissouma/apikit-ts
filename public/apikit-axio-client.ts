@@ -39,7 +39,7 @@ export async function apikitRequest<TResponse>(
         // transforme les exception en ApikitException
         const exception:ApikitException = errorNormalizer(error);
 
-        if (exception.errorType === ErrorCategory.SERVER_UNHANDLED) {
+        if (exception.errorType !== ErrorCategory.BUSINESS) {
             handleGlobalError(exception);
         }
         throw exception;
