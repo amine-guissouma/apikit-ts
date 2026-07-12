@@ -1,7 +1,5 @@
 import {ApikitException} from "../api/apikit-exception";
 import {ErrorLevelVisibility} from "./enum/ErrorLevelVisibility";
-import {PopupService} from "../../components/info/popup/PopupService";
-import {ToastService} from "../../components/info/toast/ToastService";
 import {UIErrorConfigRegistry} from "./errorHandler/ui-config-registry";
 import {UIErrorLevelRegistry} from "./errorHandler/ui-error-level-manager";
 
@@ -17,29 +15,31 @@ export const handleGlobalError = (error: ApikitException):void => {
         return; // IMPORTANT: on stop tout ici
     }
 
-    // 2. DEFAULT BEHAVIOR (ton switch original)
-
+    // 2. DEFAULT BEHAVIOR
     switch (error_level) {
         case ErrorLevelVisibility.DEV:
-            PopupService.open({title: error.code, content: error.message,});
-            console.log("error DEV");
+            console.log(`[ ${GLOBAL_ERROR} DEV ]`);
             console.error(GLOBAL_ERROR, error.code, error.message);
-            ToastService.error(error.message);
+            if (error.details) {
+                console.error(error.details);
+            }
             break;
+
         case ErrorLevelVisibility.INTEG:
-            console.log("error INTEG");
+            console.log(`[ ${GLOBAL_ERROR} INTEG ]`);
             console.error(GLOBAL_ERROR, error.code, error.message);
+            if (error.details) {
+                console.error(error.details);
+            }
             break;
 
         case ErrorLevelVisibility.QUAL:
-            console.log("error QUAL");
-            ToastService.error(error.message);
+            console.log(`[ ${GLOBAL_ERROR} QUAL ]`);
             console.error(GLOBAL_ERROR, error.code, error.message);
             break;
 
         case ErrorLevelVisibility.PROD:
-            ToastService.error(error.message);
-            console.log("error PROD");
+            console.log(`[ ${GLOBAL_ERROR} PROD ]`);
             console.error(GLOBAL_ERROR, error.code, error.message);
             break;
     }
