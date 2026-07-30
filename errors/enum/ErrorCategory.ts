@@ -1,12 +1,21 @@
 export enum ErrorCategory {
-    SERVER_UNHANDLED = "SERVER_UNHANDLED",  // erreurs backend non gérées (bug serveur / fuite)
+    SERVER = "SERVER",  // erreurs backend identifier mais non gérées (bug serveur / fuite)
 
-    BUSINESS = "BUSINESS",      // erreurs backend métier
+    SERVER_UNEXPECTED = "SERVER_UNEXPECTED",  // erreurs backend non gérées (bug serveur / fuite) erreur 500
 
-    TECHNICAL = "TECHNICAL",    // erreurs techniques (réseau / axios / sdk / infra)
+    SERVER_UNAVAILABLE = 'SERVER_UNAVAILABLE' ,   // impossibilité de joindre le server
 
-    CONTRACT= "CONTRACT",       // erreurs cntract non respecter
+    TECHNICAL = "TECHNICAL",                    // erreurs techniques (réseau / axios / sdk / infra)
 
-    UNEXPECTED = "UNEXPECTED",
+    CONTRACT= "CONTRACT",                       // erreurs cntract non respecter
 
+    BUSINESS = "BUSINESS",                      // erreurs backend identifier -> métier le developper front doit metre en place le comportement repondant a une spec
+
+    AUTHENTICATION =    "AUTHENTICATION",       // erreur business specifique a l'authenification
+
+    AUTHORIZATION =     'AUTHORIZATION' ,       // erreur business specifique a l'authorisation
+
+    CANCELLED ='CANCELLED' ,                    // erreur d'anulation de requette
+
+    UNEXPECTED = "UNEXPECTED",                  // erreur innatendu front / cleint ...
 }
