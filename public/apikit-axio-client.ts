@@ -1,5 +1,4 @@
 import {AxiosRequestConfig, AxiosResponse} from "axios";
-import {ApikitResponse} from "../api/apikit-types";
 import {api} from "../http/axios/axio-client";
 import {apikitUnwrapper} from "../api/apikit-unwrapper";
 import {ApikitException} from "../api/apikit-exception";
@@ -7,7 +6,7 @@ import {handleGlobalError} from "../errors/error-handler";
 import {errorNormalizer} from "../errors/error-normalizer";
 import { z } from 'zod';
 import {shouldHandleGlobalError} from "../errors/should-handle-global-error";
-
+import {ApikitHookRegistry} from "../config/apikit-hook-registry";
 
 export interface RequestOptions extends Omit<AxiosRequestConfig, "data"> {
     payload?: unknown;
@@ -19,19 +18,34 @@ export async function apikitRequest<TResponse>(
     { payload, ...config }: RequestOptions = {},
     schema?: z.ZodSchema<TResponse>,
 ): Promise<TResponse> {
+    const hooks = ApikitHookRegistry.get();
+
     try {
-        // exeuete la requette
-        const response: AxiosResponse<ApikitResponse<TResponse>> = await api.request<ApikitResponse<TResponse>>({
-                method,
-                url,
-                data: {payload:  payload},
-                ...config
-            });
+        let requestConfig: AxiosRequestConfig  = {
+            method,
+            url,
+            data:{payload},
+            ...config
+        };
+        // Point d'extension utilisateur avant l'envoi de la requête
+        for(const hook of hooks.beforeRequest ?? []){
+            requestConfig = await hook(requestConfig);
+        }
+        // Exécution de la requête HTTP
+        const response = await api.request(requestConfig);
 
-        // recupere la reponse de la requette
-        const data: TResponse = apikitUnwrapper(response.data);
 
-        // verifie la reponse corresepon au contrat
+        // Point d'extension utilisateur après une réponse réussie
+        let processedResponse = response;
+
+        for(const hook of hooks.afterResponse ?? []){
+            processedResponse = await hook(processedResponse);
+        }
+
+        // Recupere la reponse de la requette
+        const data: TResponse = apikitUnwrapper(processedResponse.data);
+
+        // Vérifie la reponse correspond au contrat
         if (schema) {
             return schema.parse(data);
         }
@@ -41,14 +55,24 @@ export async function apikitRequest<TResponse>(
 
     } catch (error : unknown) {
 
-        // normalise les exceptions en ApikitExceptions
-        const exception:ApikitException = errorNormalizer(error);
+        // Normalisation de toutes les erreurs en ApikitException
+        let exception:ApikitException = errorNormalizer(error);
 
-        // Gère l'affichages des exeptions
+        // Point d'extension utilisateur après normalisation de l'erreur
+        for(const hook of hooks.onError ?? []){
+            try {
+                exception = await hook(exception);
+            } catch(e){
+                exception = errorNormalizer(e);
+            }
+        }
+
+        // Gestion globale de l'erreur (UI, logs...)
         if (shouldHandleGlobalError(exception)){
             handleGlobalError(exception);
         }
-        // Dans tous les cas leves l'exeption normaliser apikit
+
+        // Propagation de l'exception normalisée
         throw exception;
     }
 }
