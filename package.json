@@ -1,0 +1,7 @@
+{
+  "name": "apikit",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

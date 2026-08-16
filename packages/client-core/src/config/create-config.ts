@@ -1,14 +1,13 @@
 import {ErrorLevelVisibility} from "../errors/enum/ErrorLevelVisibility";
-import {UiErrorConfig, UIErrorConfigRegistry} from "../errors/errorHandler/ui-config-registry";
+import {UiErrorConfig, UIErrorConfigRegistry} from "../errors/handler/ui-config-registry";
 import {ErrorCategory} from "../errors/enum/ErrorCategory";
-import {UIErrorLevelRegistry} from "../errors/errorHandler/ui-error-level-manager";
-import {BusinessErrorRegistry} from "../errors/business-error-codes";
+import {UIErrorLevelRegistry} from "../errors/handler/ui-error-level-manager";
+import {BusinessErrorRegistry} from "../errors/mapping/business-error-codes";
 import {ApikitHooks} from "./apikit-hooks";
 import {ApikitHookRegistry} from "./apikit-hook-registry";
 
 export interface ApikitConfig {
 
-    baseURL?: string;
 
     visibility?: ErrorLevelVisibility;
 
@@ -22,9 +21,7 @@ export interface ApikitConfig {
 
 export function configureApikit(config: ApikitConfig): void {
 
-    if (config.baseURL) {
-        // todo faire un registre api.defaults.baseURL = config.baseURL;
-    }
+
     if (config.visibility) {
         UIErrorLevelRegistry.set(config.visibility);
     }

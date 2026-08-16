@@ -1,11 +1,11 @@
-import {ApikitException} from "../api/apikit-exception";
+import {ApikitException} from "../../exception/apikit-exception";
 import axios, {AxiosError} from "axios";
-import {ErrorCategory} from "./enum/ErrorCategory";
-import {ErrorDefinition, getMappedError} from "../http/mapper-error-tool";
-import {AxiosErrorMapper} from "../http/axios/axios-error-mapper";
-import {errorClassifier} from "./error-classifier";
+import {ErrorCategory} from "../enum/ErrorCategory";
+import {ErrorDefinition, getMappedError} from "../../http/mapper-error-tool";
+import {AxiosErrorMapper} from "../../http/axios/axios-error-mapper";
+import {errorClassifier} from "../mapping/error-classifier";
 import {ZodError} from "zod";
-import {HttpStatusMapper} from "../http/status/http-status-mapper";
+import {HttpStatusMapper} from "../../http/status/http-status-mapper";
 
 
 export const errorNormalizer = (error: unknown): ApikitException => {

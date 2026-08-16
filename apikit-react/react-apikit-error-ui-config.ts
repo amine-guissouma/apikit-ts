@@ -1,7 +1,6 @@
 import {PopupService} from "./ui_conponents/popup/PopupService";
 import {ToastService} from "./ui_conponents/toast/ToastService";
-import {UiErrorConfig} from "../core/src/errors/errorHandler/ui-config-registry";
-import {ApikitException} from "../core/src/api/apikit-exception";
+import {ApikitException,UiErrorConfig} from "@apikit/client-core";
 
 export const UIErrorConfig:UiErrorConfig = {
     dev: (error:ApikitException) => {

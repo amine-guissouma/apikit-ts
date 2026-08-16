@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import { ApikitException } from "../api/apikit-exception";
+import { ApikitException } from "../exception/apikit-exception";
 
 
 export type BeforeRequestHook =

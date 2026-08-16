@@ -1,6 +1,6 @@
-import {ApikitException} from "./apikit-exception";
-import {ErrorCategory} from "../errors/enum/ErrorCategory";
-import {errorClassifier} from "../errors/error-classifier";
+import {ApikitException} from "../../exception/apikit-exception";
+import {ErrorCategory} from "../../errors/enum/ErrorCategory";
+import {errorClassifier} from "../../errors/mapping/error-classifier";
 import {ApikitBaseResponse, apikitBaseResponseSchema} from "./apikit-schema";
 import {z} from "zod";
 

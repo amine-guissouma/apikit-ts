@@ -1,5 +1,5 @@
-import {ApikitException} from "../api/apikit-exception";
-import {ErrorCategory} from "./enum/ErrorCategory";
+import {ApikitException} from "../../exception/apikit-exception";
+import {ErrorCategory} from "../enum/ErrorCategory";
 
 export const shouldHandleGlobalError = (
     error: ApikitException

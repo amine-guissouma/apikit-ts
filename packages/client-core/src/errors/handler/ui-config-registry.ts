@@ -1,4 +1,4 @@
-import {ApikitException} from "../../api/apikit-exception";
+import {ApikitException} from "../../exception/apikit-exception";
 import {ErrorLevelVisibility} from "../enum/ErrorLevelVisibility";
 
 export type ErrorCallback = (error: ApikitException) => void;

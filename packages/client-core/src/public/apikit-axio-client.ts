@@ -2,11 +2,11 @@ import {AxiosRequestConfig} from "axios";
 import {z} from "zod";
 
 import {api} from "../http/axios/axio-client";
-import {apikitUnwrapper} from "../api/apikit-unwrapper";
-import {ApikitException} from "../api/apikit-exception";
-import {handleGlobalError} from "../errors/error-handler";
-import {errorNormalizer} from "../errors/error-normalizer";
-import {shouldHandleGlobalError} from "../errors/should-handle-global-error";
+import {apikitUnwrapper} from "../contracts/response/apikit-unwrapper";
+import {ApikitException} from "../exception/apikit-exception";
+import {handleGlobalError} from "../errors/handler/error-handler";
+import {errorNormalizer} from "../errors/handler/error-normalizer";
+import {shouldHandleGlobalError} from "../errors/handler/should-handle-global-error";
 import {ApikitHookRegistry} from "../config/apikit-hook-registry";
 
 

@@ -1,4 +1,4 @@
-import { ErrorCategory } from "./enum/ErrorCategory";
+import { ErrorCategory } from "../enum/ErrorCategory";
 
 class BusinessErrorManager {
     private codes: Record<string, ErrorCategory> = {};

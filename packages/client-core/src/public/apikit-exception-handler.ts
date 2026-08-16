@@ -1,7 +1,7 @@
 // ----------------------
-import {ApikitException} from "../api/apikit-exception";
+import {ApikitException} from "../exception/apikit-exception";
 import {ErrorCategory} from "../errors/enum/ErrorCategory";
-import {handleGlobalError} from "../errors/error-handler";
+import {handleGlobalError} from "../errors/handler/error-handler";
 
 export interface ApikitExceptionHandlerOptions {
     error: unknown;

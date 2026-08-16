@@ -1,7 +1,7 @@
-import {ApikitException} from "../api/apikit-exception";
-import {ErrorLevelVisibility} from "./enum/ErrorLevelVisibility";
-import {UIErrorConfigRegistry} from "./errorHandler/ui-config-registry";
-import {UIErrorLevelRegistry} from "./errorHandler/ui-error-level-manager";
+import {ApikitException} from "../../exception/apikit-exception";
+import {ErrorLevelVisibility} from "../enum/ErrorLevelVisibility";
+import {UIErrorConfigRegistry} from "./ui-config-registry";
+import {UIErrorLevelRegistry} from "./ui-error-level-manager";
 
 
 const GLOBAL_ERROR = "[APIKIT GLOBAL ERROR]";
@@ -41,6 +41,20 @@ export const handleGlobalError = (error: ApikitException):void => {
         case ErrorLevelVisibility.PROD:
             console.log(`[ ${GLOBAL_ERROR} PROD ]`);
             console.error(GLOBAL_ERROR, error.code, error.message);
+            break;
+
+        default:
+            console.error(
+                GLOBAL_ERROR,
+                "Unknown error visibility level",
+                error_level
+            );
+
+            console.error(error.code, error.message);
+
+            if (error.details) {
+                console.error(error.details);
+            }
             break;
     }
 };

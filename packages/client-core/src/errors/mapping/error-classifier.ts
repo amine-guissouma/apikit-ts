@@ -1,6 +1,5 @@
-import { ErrorCategory } from "./enum/ErrorCategory";
-import { BusinessErrorRegistry} from "./business-error-codes";
-
+import { ErrorCategory } from "../enum/ErrorCategory";
+import {BusinessErrorRegistry} from "./business-error-codes";
 
 export const errorClassifier = (code?: string): ErrorCategory => {
 
