@@ -19,7 +19,7 @@ export class Apikit {
         config?:RequestOptions,
         schema?: z.ZodSchema<T>,
     ): Promise<T> {
-        return this.request("GET", url, {...(config as any), payload: undefined as never,}, schema);
+        return this.request("GET", url, {...(config as RequestOptions), payload: undefined as never,}, schema);
     }
 
     delete<T>(
@@ -27,7 +27,7 @@ export class Apikit {
         config?:RequestOptions,
         schema?: z.ZodSchema<T>,
     ): Promise<T> {
-        return this.request("DELETE", url, {...(config as any), payload: undefined as never,}, schema);
+        return this.request("DELETE", url, {...(config as RequestOptions), payload: undefined as never,}, schema);
     }
 
     head<T>(
@@ -35,7 +35,7 @@ export class Apikit {
         config?: RequestOptions,
         schema?: z.ZodSchema<T>,
     ): Promise<T> {
-        return this.request("HEAD", url, {...(config as any), payload: undefined as never,}, schema);
+        return this.request("HEAD", url, {...(config as RequestOptions), payload: undefined as never,}, schema);
     }
 
     options<T>(
@@ -43,7 +43,7 @@ export class Apikit {
         config?: RequestOptions,
         schema?: z.ZodSchema<T>,
     ): Promise<T> {
-        return this.request("OPTIONS", url, {...(config as any), payload: undefined as never,}, schema);
+        return this.request("OPTIONS", url, {...(config as RequestOptions), payload: undefined as never,}, schema);
     }
 
     post<T>(
@@ -52,7 +52,6 @@ export class Apikit {
         config?: RequestOptions,
         schema?: z.ZodSchema<T>,
     ): Promise<T> {
-        console.log(payload);
         return this.request("POST", url, {...config, payload,}, schema);
     }
 

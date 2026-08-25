@@ -12,6 +12,12 @@ export const AxiosErrorMapper: Record<string, ErrorDefinition> = {
 
     },
 
+    ECONNREFUSED: {
+        code: "APIKIT_NETWORK_ERROR",
+        message: "Impossible de joindre le serveur.",
+        category: ErrorCategory.TECHNICAL,
+    },
+
     ECONNABORTED: {
         code: "APIKIT_AXIOS_NETWORK_TIMEOUT",
         message: "Le délai d'attente du serveur est dépassé.",

@@ -10,7 +10,9 @@ class HookRegistry {
     get():ApikitHooks{
         return this.hooks;
     }
-
+    clear() {
+        this.hooks = {};
+    }
 }
 
 

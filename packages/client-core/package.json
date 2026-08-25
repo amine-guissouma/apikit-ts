@@ -1,10 +1,8 @@
 {
   "name": "@apikit/client-core",
   "version": "0.0.1",
-
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,22 +10,21 @@
       "default": "./dist/index.js"
     }
   },
-
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
-
   "dependencies": {
     "zod": "^4.4.3"
   },
-
   "peerDependencies": {
     "axios": "^1.0.0"
   },
-
   "devDependencies": {
+    "axios": "^1.15.0",
     "typescript": "^5.7.3",
-    "axios": "^1.15.0"
+    "vitest": "^4.1.10"
   }
 }

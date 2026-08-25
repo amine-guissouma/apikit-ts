@@ -18,6 +18,9 @@ class BusinessErrorManager {
     getCategory(code: string): ErrorCategory | undefined {
         return this.codes[code];
     }
+    reset(): void {
+        this.codes = {};
+    }
 }
 
 export const BusinessErrorRegistry = new BusinessErrorManager();
