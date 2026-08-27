@@ -1,4 +1,5 @@
 import {ErrorCategory} from "../errors/enum/ErrorCategory";
+import {ApikitErrorDefinitions} from "../errors/definitions/apikit-error-definitions";
 
 export interface ErrorDefinition {
     code: string;
@@ -6,16 +7,11 @@ export interface ErrorDefinition {
     category: ErrorCategory;
 }
 
-const DefaultError = {
-    code: "UNKNOWN_CODE_ERROR",
-    message: "key could not be found.",
-    category: ErrorCategory.UNEXPECTED
-};
 
 export const getMappedError = (
     map: Record<  number | string, ErrorDefinition>,
      key?: number | string,
-    defaultError: ErrorDefinition = DefaultError
+    defaultError: ErrorDefinition = ApikitErrorDefinitions.APIKIT_UNKNOWN_CODE_ERROR
 ): ErrorDefinition => {
 
     if (key == null) {

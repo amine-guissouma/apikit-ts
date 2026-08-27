@@ -1,28 +1,22 @@
 import {ApikitException} from "../../exception/apikit-exception";
-import {ErrorCategory} from "../../errors/enum/ErrorCategory";
 import {errorClassifier} from "../../errors/mapping/error-classifier";
 import {ApikitBaseResponse, apikitBaseResponseSchema} from "./apikit-schema";
 import {z} from "zod";
+import {ApikitErrorDefinitions} from "../../errors/definitions/apikit-error-definitions";
 
 
 export const apikitUnwrapper = <T>(
     response: unknown
 ): T => {
 
-
     // --------------------------------------------
-    // Validation contrat Apikit
+    // [RESPONSE-UNWRAPPER-Invalid_Apikit_Response]
+    // Validation du contrat Apikit
     // --------------------------------------------
     const result: z.ZodSafeParseResult<ApikitBaseResponse> = apikitBaseResponseSchema.safeParse(response);
 
-
     if (!result.success) {
-        throw new ApikitException(
-            "APIKIT_RESPONSE_INVALID",
-            "Invalid Apikit response format",
-            ErrorCategory.CONTRACT,
-            result.error.issues
-        );
+        throw new ApikitException(ApikitErrorDefinitions.APIKIT_RESPONSE_INVALID, result.error.issues);
     }
 
     const apiResponse:ApikitBaseResponse = result.data;
@@ -31,33 +25,33 @@ export const apikitUnwrapper = <T>(
     // --------------------------------------------
     // Cas erreur API
     // --------------------------------------------
-
     if (!apiResponse.success) {
+        // --------------------------------------------
+        // [RESPONSE-UNWRAPPER-Missing_Error_Contract]
+        // Contrat d'erreur incomplet
+        // --------------------------------------------
         if (!apiResponse.error) {
-            throw new ApikitException(
-                "APKIT_ERROR_MALFORMED",
-                "Malformed API error response",
-                ErrorCategory.CONTRACT
-            );
+            throw new ApikitException(ApikitErrorDefinitions.APIKIT_ERROR_MALFORMED);
         }
-        throw new ApikitException(
-            apiResponse.error.code,
-            apiResponse.error.message,
-            errorClassifier(apiResponse.error.code),
-            apiResponse.error.details
-        );
+        // --------------------------------------------
+        // [RESPONSE-UNWRAPPER-Api_Error_Response]
+        // Erreur API valide
+        // --------------------------------------------
+        const error = apiResponse.error;
+        throw new ApikitException(error.code, error.message, errorClassifier(error.code), error.details);
     }
 
     // --------------------------------------------
-    // Cas succès
+    // [RESPONSE-UNWRAPPER-Missing_Data]
+    // Réponse succès sans data
     // --------------------------------------------
     if (!("data" in apiResponse)) {
-        throw new ApikitException(
-            "APIKIT_DATA_MISSING",
-            "Successful API response has no data",
-            ErrorCategory.CONTRACT
-        );
+        throw new ApikitException(ApikitErrorDefinitions.APIKIT_DATA_MISSING);
     }
 
+    // --------------------------------------------
+    // [RESPONSE-UNWRAPPER-Success_Response]
+    // Réponse succès avec data
+    // --------------------------------------------
     return apiResponse.data as T;
 };

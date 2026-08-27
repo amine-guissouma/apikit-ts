@@ -105,7 +105,7 @@ describe("apikitUnwrapper", () => {
             apikitUnwrapper(response);
         }).toThrow(
             expect.objectContaining({
-                code: "APKIT_ERROR_MALFORMED",
+                code: "APIKIT_ERROR_MALFORMED",
                 errorType: ErrorCategory.CONTRACT,
             })
         );

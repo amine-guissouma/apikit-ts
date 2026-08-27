@@ -335,11 +335,10 @@ describe("errorNormalizer", () => {
 
         expect(result).toBeInstanceOf(ApikitException);
         expect(result.code).toBe("APIKIT_INVALID_ERROR_CONTRACT");
-        expect(result.message).toBe(
-            "data est absent du contrat d'erreur"
-        );
+        expect(result.message).toBe("error est absent du contrat d'erreur");
         expect(result.errorType).toBe(ErrorCategory.CONTRACT);
     });
+    // todo tester le cas de figure data
     it("doit utiliser la catégorie métier configurée pour une erreur serveur", () => {
         BusinessErrorRegistry.set({
             USER_NOT_FOUND: ErrorCategory.BUSINESS,
