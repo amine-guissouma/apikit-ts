@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {ErrorCategory} from "../../../../../src/errors/enum/ErrorCategory";
 import {apikitRequest} from "../../../../../src/public/apikit-axio-client";
 import {createTestServer} from "../../../../utils/server";
+import {ApikitAxiosErrorCode} from "../../../../../src/http/axios/enum/ApikitAxiosErrorCode";
 
 const TEST_ID = "IT-ERR-010";
 
@@ -47,7 +48,7 @@ describe(`Integration - apikitRequest - timeout - ${TEST_ID}`, () => {
                 undefined,
             )
         ).rejects.toMatchObject({
-            code: "APIKIT_AXIOS_NETWORK_TIMEOUT",
+            code: ApikitAxiosErrorCode.APIKIT_AXIOS_ECONNABORTED,
             errorType: ErrorCategory.TECHNICAL,
         });
     });

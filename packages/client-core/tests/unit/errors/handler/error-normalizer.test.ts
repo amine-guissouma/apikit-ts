@@ -1,412 +1,323 @@
-import {beforeEach, describe, expect, it} from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 
 import { errorNormalizer } from "../../../../src/errors/handler/error-normalizer";
 import { ApikitException } from "../../../../src/exception/apikit-exception";
 import { ErrorCategory } from "../../../../src/errors/enum/ErrorCategory";
-import {BusinessErrorRegistry} from "../../../../src/errors/mapping/business-error-codes";
+import { BusinessErrorRegistry } from "../../../../src/errors/mapping/business-error-codes";
 
+import { ApikitErrorDefinitions } from "../../../../src/errors/definitions/apikit-error-definitions";
+import { AxiosErrorMapper } from "../../../../src/http/axios/axios-error-mapper";
+import { HttpStatusMapper } from "../../../../src/http/status/http-status-mapper";
+import {expectedAxiosCodes, expectedHttpStatus} from "../../../fixture/expected-mappings";
+
+function test_errorNormalizer_httpStatus(status: number, statusText: string, code: string) {
+    const response = {
+        status: status,
+        statusText: statusText,
+        headers: {},
+        config: {} as any,
+        data: {},
+    };
+
+    const error = new axios.AxiosError(
+        `Request failed with status code ${status}`,
+        code,
+        undefined,
+        undefined,
+        response
+    );
+
+    const result = errorNormalizer(error);
+
+    const expected = new ApikitException(HttpStatusMapper[status]);
+    expect(result).toEqual(expected);
+}
+
+function test_axios_error(message: string, code: string) {
+    const axiosError = new axios.AxiosError(message, code);
+    const result = errorNormalizer(axiosError);
+
+    const expected = new ApikitException(AxiosErrorMapper[code]);
+    expect(result).toEqual(expected);
+}
 
 
 describe("errorNormalizer", () => {
+
     beforeEach(() => {
         BusinessErrorRegistry.reset();
     });
-    it("doit retourner la même ApikitException", () => {
-
-        const exception = new ApikitException(
-            "USER_NOT_FOUND",
-            "Utilisateur introuvable",
-            ErrorCategory.BUSINESS
-        );
-
-        const result = errorNormalizer(exception);
-
-        expect(result).toBe(exception);
-    });
 
 
-    it("doit transformer une erreur inconnue en ApikitException", () => {
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Apikit_Exception]
+    // ------------------------------------------------
 
-        const result = errorNormalizer(
-            new Error("Erreur inconnue")
-        );
+    it(
+        "[UT-ERR-NORMALIZER-Apikit_Exception] doit retourner la même ApikitException",
+        () => {
 
-        expect(result).toBeInstanceOf(ApikitException);
+            const exception = new ApikitException(ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR);
 
-        expect(result.code).toBe("APIKIT_UNKNOWN_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.UNEXPECTED);
-    });
-
-
-    it("doit transformer une valeur non Error en ApikitException", () => {
-
-        const result = errorNormalizer("Erreur inconnue");
-
-        expect(result).toBeInstanceOf(ApikitException);
-
-        expect(result.code).toBe("APIKIT_UNKNOWN_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.UNEXPECTED);
-    });
-    it("doit transformer une ZodError en ApikitException CONTRACT", () => {
-
-        const schema = z.object({
-            name: z.string(),
-            age: z.number(),
-        });
-
-        const validation = schema.safeParse({
-            name: "Amino",
-            age: "trente",
-        });
-
-        expect(validation.success).toBe(false);
-
-        if (validation.success) {
-            return;
+            const result = errorNormalizer(exception);
+            expect(result).toBe(exception);
         }
+    );
 
-        const result = errorNormalizer(validation.error);
 
-        expect(result).toBeInstanceOf(ApikitException);
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Not_Axios_Error]
+    // ------------------------------------------------
 
-        expect(result.code).toBe("APIKIT_ZOD_SCHEMA_INVALID");
-        expect(result.errorType).toBe(ErrorCategory.CONTRACT);
-        expect(result.message).toBe("API contract violation");
+    it("[UT-ERR-NORMALIZER-Not_Axios_Error] doit transformer une erreur inconnue", () => {
 
-        expect(result.details).toEqual(validation.error.issues);
-    });
+            const result = errorNormalizer(new Error("Erreur inconnue"));
 
-    it("doit transformer une erreur Axios réseau", () => {
-
-        const axiosError = new axios.AxiosError(
-            "Network Error",
-            "ERR_NETWORK"
-        );
-
-        const result = errorNormalizer(axiosError);
-
-        expect(result).toBeInstanceOf(ApikitException);
-
-        expect(result.code).toBe("APIKIT_NETWORK_ERROR");
-
-        expect(result.message).toBe(
-            "Impossible de joindre le serveur."
-        );
-
-        expect(result.errorType).toBe(
-            ErrorCategory.TECHNICAL
-        );
-    });
-
-    it("doit transformer une erreur Axios de timeout", () => {
-
-        const axiosError = new axios.AxiosError(
-            "timeout",
-            "ECONNABORTED"
-        );
-
-        const result = errorNormalizer(axiosError);
-
-        expect(result).toBeInstanceOf(ApikitException);
-
-        expect(result.code).toBe(
-            "APIKIT_AXIOS_NETWORK_TIMEOUT"
-        );
-
-        expect(result.message).toBe(
-            "Le délai d'attente du serveur est dépassé."
-        );
-
-        expect(result.errorType).toBe(
-            ErrorCategory.TECHNICAL
-        );
-    });
-
-    it("doit transformer une requête Axios annulée", () => {
-
-        const axiosError = new axios.AxiosError(
-            "Request canceled",
-            "ERR_CANCELED"
-        );
-
-        const result = errorNormalizer(axiosError);
-
-        expect(result).toBeInstanceOf(ApikitException);
-
-        expect(result.code).toBe(
-            "APIKIT_AXIOS_REQUEST_CANCELED"
-        );
-
-        expect(result.message).toBe(
-            "La requête a été annulée."
-        );
-
-        expect(result.errorType).toBe(
-            ErrorCategory.CANCELLED
-        );
+            const expected = new ApikitException(ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR);
+            expect(result).toEqual(expected);
     });
 
 
+    it("[UT-ERR-NORMALIZER-Not_Axios_Error] doit transformer une valeur non Error", () => {
 
-    it("doit transformer une erreur Axios 401 en erreur AUTHENTICATION", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 401",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 401,
-                statusText: "Unauthorized",
-                headers: {},
-                config: {} as any,
-                data: {},
+            const result = errorNormalizer("Erreur inconnue");
+
+            const expected = new ApikitException(ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR);
+            expect(result).toEqual(expected);
+    });
+
+
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Zod_Error]
+    // ------------------------------------------------
+
+    it(
+        "[UT-ERR-NORMALIZER-Zod_Error] doit transformer une ZodError",
+        () => {
+
+            const schema = z.object({name: z.string(), age: z.number(),});
+
+            const validation = schema.safeParse({name: "Amino", age: "trente",});
+
+            expect(validation.success).toBe(false);
+            if (validation.success) {
+                return;
             }
-        );
 
-        const result = errorNormalizer(error);
+            const result = errorNormalizer(validation.error);
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_401_AUTHENTICATION_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.AUTHENTICATION);
-    });
-    it("doit transformer une erreur Axios 403 en erreur AUTHORIZATION", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 403",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 403,
-                statusText: "Forbidden",
-                headers: {},
-                config: {} as any,
-                data: {},
-            }
-        );
+            const expected = new ApikitException(ApikitErrorDefinitions.APIKIT_ZOD_SCHEMA_INVALID, validation.error.issues);
+            expect(result).toEqual(expected);
+        }
+    );
 
-        const result = errorNormalizer(error);
+    // ================================================
+    // axios
+    // ================================================
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_403_AUTHORIZATION_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.AUTHORIZATION);
-    });
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Axios_No_Response]
+    // ------------------------------------------------
 
-    it("doit transformer une erreur Axios 500 en erreur SERVER_UNEXPECTED", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 500",
-            "ERR_BAD_RESPONSE",
-            undefined,
-            undefined,
-            {
-                status: 500,
-                statusText: "Internal Server Error",
-                headers: {},
-                config: {} as any,
-                data: {},
-            }
-        );
+    it.each(expectedAxiosCodes)(
+        "[UT-ERR-NORMALIZER-Axios_No_Response] doit gérer l'erreur Axios sans reponse de type $0 ",
+        (code) => {
+            test_axios_error('message', code);
+        }
+    );
 
-        const result = errorNormalizer(error);
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_500_UNKNOWN_SERVER_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.SERVER_UNEXPECTED);
-    });
-    it("doit transformer une erreur Axios 502 en erreur SERVER_UNAVAILABLE", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 502",
-            "ERR_BAD_RESPONSE",
-            undefined,
-            undefined,
-            {
-                status: 502,
-                statusText: "Bad Gateway",
-                headers: {},
-                config: {} as any,
-                data: {},
-            }
-        );
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Axios_Http_Status]
+    // ------------------------------------------------
+    it.each(expectedHttpStatus)(
+        "[UT-ERR-NORMALIZER-Axios_Http_Status] doit gérer le statut HTTP $0",
+        (status) => {
+            test_errorNormalizer_httpStatus(status, "statusText", "code");
+        }
+    );
 
-        const result = errorNormalizer(error);
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_502_PROXY_GATEWAY_ERROR");
-        expect(result.errorType).toBe(ErrorCategory.SERVER_UNAVAILABLE);
-    });
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Axios_No_Data]
+    // ------------------------------------------------
 
-    it("doit transformer une erreur Axios 503 en erreur SERVER_UNAVAILABLE", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 503",
-            "ERR_BAD_RESPONSE",
-            undefined,
-            undefined,
-            {
-                status: 503,
-                statusText: "Service Unavailable",
-                headers: {},
-                config: {} as any,
-                data: {},
-            }
-        );
+    it(
+        "[UT-ERR-NORMALIZER-Axios_No_Data] doit détecter une réponse Axios sans data",
+        () => {
 
-        const result = errorNormalizer(error);
+            const error = new axios.AxiosError(
+                "Request failed",
+                "ERR_BAD_REQUEST",
+                undefined,
+                undefined,
+                {
+                    status: 400,
+                    statusText: "Bad Request",
+                    headers: {},
+                    config: {} as any,
+                    data: undefined,
+                }
+            );
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_503_SERVICE_UNAVAILABLE");
-        expect(result.errorType).toBe(ErrorCategory.SERVER_UNAVAILABLE);
-    });
+            const result = errorNormalizer(error);
 
-    it("doit transformer une erreur Axios 504 en erreur SERVER_UNAVAILABLE", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 504",
-            "ERR_BAD_RESPONSE",
-            undefined,
-            undefined,
-            {
-                status: 504,
-                statusText: "Gateway Timeout",
-                headers: {},
-                config: {} as any,
-                data: {},
-            }
-        );
+            const expected = new ApikitException(ApikitErrorDefinitions.APIKIT_MISSING_RESPONSE_DATA_AXIOS);
+            expect(result).toEqual(expected);
+        }
+    );
 
-        const result = errorNormalizer(error);
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_HTTP_504_TIMEOUT");
-        expect(result.errorType).toBe(ErrorCategory.SERVER_UNAVAILABLE);
-    });
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Axios_No_Error_Contract]
+    // ------------------------------------------------
 
-    it("doit transformer une erreur Axios HTTP inconnue avec un contrat ApiKit valide", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 400",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 400,
-                statusText: "Bad Request",
-                headers: {},
-                config: {} as any,
-                data: {
-                    error: {
-                        code: "USER_NOT_FOUND",
-                        message: "Utilisateur introuvable",
-                        details: {
-                            userId: 42,
-                        },
+    it(
+        "[UT-ERR-NORMALIZER-Axios_No_Error_Contract] doit détecter un contrat d'erreur invalide",
+        () => {
+
+            const error = new axios.AxiosError(
+                "Request failed with status code 400",
+                "ERR_BAD_REQUEST",
+                undefined,
+                undefined,
+                {
+                    status: 400,
+                    statusText: "Bad Request",
+                    headers: {},
+                    config: {} as any,
+                    data: {
+                        message: "Erreur serveur",
                     },
+                }
+            );
+
+            const result = errorNormalizer(error);
+
+            const expected = new ApikitException(ApikitErrorDefinitions.APIKIT_INVALID_ERROR_CONTRACT);
+            expect(result).toEqual(expected);
+        }
+    );
+
+
+    // ------------------------------------------------
+    // [ERR-NORMALIZER-Api_Error_Response]
+    // ------------------------------------------------
+
+    it(
+        "[UT-ERR-NORMALIZER-Api_Error_Response] doit normaliser une erreur API",
+        () => {
+
+            const apiError = {
+                code: "USER_NOT_FOUND",
+                message: "Utilisateur introuvable",
+                details: {
+                    userId: 42,
                 },
-            }
-        );
+            };
 
-        const result = errorNormalizer(error);
-
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("USER_NOT_FOUND");
-        expect(result.message).toBe("Utilisateur introuvable");
-        expect(result.errorType).toBe(ErrorCategory.SERVER);
-        expect(result.details).toEqual({
-            userId: 42,
-        });
-    })
-
-    it("doit détecter un contrat d'erreur ApiKit invalide", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 400",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 400,
-                statusText: "Bad Request",
-                headers: {},
-                config: {} as any,
-                data: {
-                    message: "Erreur serveur",
-                },
-            }
-        );
-
-        const result = errorNormalizer(error);
-
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_INVALID_ERROR_CONTRACT");
-        expect(result.message).toBe("error est absent du contrat d'erreur");
-        expect(result.errorType).toBe(ErrorCategory.CONTRACT);
-    });
-    // todo tester le cas de figure data
-    it("doit utiliser la catégorie métier configurée pour une erreur serveur", () => {
-        BusinessErrorRegistry.set({
-            USER_NOT_FOUND: ErrorCategory.BUSINESS,
-        });
-
-        const error = new axios.AxiosError(
-            "Request failed with status code 400",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 400,
-                statusText: "Bad Request",
-                headers: {},
-                config: {} as any,
-                data: {
-                    error: {
-                        code: "USER_NOT_FOUND",
-                        message: "Utilisateur introuvable",
-                        details: {
-                            userId: 42,
-                        },
+            const error = new axios.AxiosError(
+                "Request failed with status code 400",
+                "ERR_BAD_REQUEST",
+                undefined,
+                undefined,
+                {
+                    status: 400,
+                    statusText: "Bad Request",
+                    headers: {},
+                    config: {} as any,
+                    data: {
+                        error: apiError,
                     },
+                }
+            );
+
+            const result = errorNormalizer(error);
+
+            const expected = new ApikitException(apiError.code, apiError.message, ErrorCategory.SERVER, apiError.details);
+
+            expect(result).toEqual(expected);
+        }
+    );
+
+
+    it(
+        "[UT-ERR-NORMALIZER-Api_Error_Response] doit utiliser la catégorie métier configurée",
+        () => {
+
+            const apiError = {
+                code: "USER_NOT_FOUND",
+                message: "Utilisateur introuvable",
+                details: {
+                    userId: 42,
                 },
-            }
-        );
+            };
 
-        const result = errorNormalizer(error);
+            BusinessErrorRegistry.set({
+                [apiError.code]: ErrorCategory.BUSINESS,
+            });
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("USER_NOT_FOUND");
-        expect(result.message).toBe("Utilisateur introuvable");
-        expect(result.errorType).toBe(ErrorCategory.BUSINESS);
-        expect(result.details).toEqual({
-            userId: 42,
-        });
-    });
-
-    it("doit utiliser un code par défaut si le code d'erreur est absent", () => {
-        const error = new axios.AxiosError(
-            "Request failed with status code 400",
-            "ERR_BAD_REQUEST",
-            undefined,
-            undefined,
-            {
-                status: 400,
-                statusText: "Bad Request",
-                headers: {},
-                config: {} as any,
-                data: {
-                    error: {
-                        message: "Une erreur est survenue",
-                        details: {
-                            reason: "unknown",
-                        },
+            const error = new axios.AxiosError(
+                "Request failed with status code 400",
+                "ERR_BAD_REQUEST",
+                undefined,
+                undefined,
+                {
+                    status: 400,
+                    statusText: "Bad Request",
+                    headers: {},
+                    config: {} as any,
+                    data: {
+                        error: apiError,
                     },
+                }
+            );
+
+            const result = errorNormalizer(error);
+
+            const expected = new ApikitException(apiError.code, apiError.message, ErrorCategory.BUSINESS, apiError.details);
+            expect(result).toEqual(expected);
+        }
+    );
+
+
+    it(
+        "[UT-ERR-NORMALIZER-Api_Error_Response] doit utiliser la définition par défaut lorsque le code est absent",
+        () => {
+
+            const apiError = {
+                message: "Une erreur est survenue",
+                details: {
+                    reason: "unknown",
                 },
-            }
-        );
+            };
 
-        const result = errorNormalizer(error);
+            const error = new axios.AxiosError(
+                "Request failed with status code 400",
+                "ERR_BAD_REQUEST",
+                undefined,
+                undefined,
+                {
+                    status: 400,
+                    statusText: "Bad Request",
+                    headers: {},
+                    config: {} as any,
+                    data: {
+                        error: apiError,
+                    },
+                }
+            );
 
-        expect(result).toBeInstanceOf(ApikitException);
-        expect(result.code).toBe("APIKIT_UNKNOWN_ERROR_RESPONSE");
-        expect(result.message).toBe("Une erreur est survenue");
-        expect(result.errorType).toBe(ErrorCategory.SERVER);
-        expect(result.details).toEqual({
-            reason: "unknown",
-        });
-    });
+            const result = errorNormalizer(error);
+
+            const expected = new ApikitException(
+                {...ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR_RESPONSE, message: apiError.message,}, apiError.details
+            );
+
+            expect(result).toEqual(expected);
+        }
+    );
+
 });

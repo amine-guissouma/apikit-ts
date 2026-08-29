@@ -9,6 +9,7 @@ import {ErrorCategory} from "../../../src/errors/enum/ErrorCategory";
 import {ApikitException} from "../../../src/exception/apikit-exception";
 import * as ErrorHandler from "../../../src/errors/handler/error-handler";
 import {BusinessErrorRegistry} from "../../../src/errors/mapping/business-error-codes";
+import {ApikitAxiosErrorCode} from "../../../src/http/axios/enum/ApikitAxiosErrorCode";
 
 
 
@@ -318,7 +319,7 @@ describe("apikitRequest", () => {
         await expect(
             apikitRequest("GET", "/test")
         ).rejects.toMatchObject({
-            code: "APIKIT_NETWORK_ERROR",
+            code: ApikitAxiosErrorCode.APIKIT_AXIOS_ERR_NETWORK,
             errorType: ErrorCategory.TECHNICAL,
         });
     });
@@ -327,7 +328,7 @@ describe("apikitRequest", () => {
 
         const axiosError = new AxiosError(
             "Network Error",
-            "ERR_NETWORK"
+            AxiosError.ERR_NETWORK
         );
 
         const onError = vi.fn((error) => error);
@@ -345,10 +346,7 @@ describe("apikitRequest", () => {
         expect(onError).toHaveBeenCalledTimes(1);
 
         expect(onError).toHaveBeenCalledWith(
-            expect.objectContaining({
-                code: "APIKIT_NETWORK_ERROR",
-                errorType: ErrorCategory.TECHNICAL,
-            })
+            expect.objectContaining({code: ApikitAxiosErrorCode.APIKIT_AXIOS_ERR_NETWORK, errorType: ErrorCategory.TECHNICAL,})
         );
     });
 
