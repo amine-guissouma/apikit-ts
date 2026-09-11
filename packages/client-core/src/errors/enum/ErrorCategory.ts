@@ -7,7 +7,7 @@ export enum ErrorCategory {
 
     TECHNICAL = "TECHNICAL",                    // erreurs techniques (réseau / axios / sdk / infra)
 
-    CONTRACT= "CONTRACT",                       // erreurs cntract non respecter
+    CONTRACT= "CONTRACT",                       // erreurs contract non respecter
 
     BUSINESS = "BUSINESS",                      // erreurs backend identifier -> métier le developper front doit metre en place le comportement repondant a une spec
 

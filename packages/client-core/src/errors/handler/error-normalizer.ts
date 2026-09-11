@@ -95,11 +95,12 @@ export const errorNormalizer = (
     const data = axiosValidator.getData()!;
     const code = data.error?.code;
     const message = data.error?.message;
+    const errorCategory = code ? errorClassifier(code) : ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR_RESPONSE.category;
 
     return new ApikitException(
         code ?? ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR_RESPONSE.code,
         message ?? ApikitErrorDefinitions.APIKIT_UNKNOWN_ERROR_RESPONSE.message,
-        errorClassifier(code),
+        errorCategory,
         data.error?.details
     );
 };
